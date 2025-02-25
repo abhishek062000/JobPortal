@@ -5,6 +5,10 @@ on:
     branches:
       - main  # Trigger the workflow on pushes to the main branch
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   Build:
     name: Build and Push Docker Image
@@ -13,31 +17,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: secrets.AWS_ROLE_ARN   # Use the ARN of the role to assume
-          aws-region: ap-south-1  # Change to your AWS region
+          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_GITHUB_ROLE }}
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
-
+  
       - name: Get commit hash
         id: get-commit-hash
         run: echo "commit-hash=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
+  
       - name: Get timestamp
         id: get-timestamp
         run: echo "timestamp=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_ENV
-
+  
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
         env:
-          ECR_REGISTRY: steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY:  secrets.REPO_NAME }}
-          IMAGE_TAG: env.commit-hash }} - env.timestamp }}
+            ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+            ECR_REPOSITORY: ${{ secrets.REPO_NAME }}
+            IMAGE_TAG: ${{ env.commit-hash }}-${{ env.timestamp }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
+            docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+            docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
