@@ -44,7 +44,7 @@ jobs:
         env:
             ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
             ECR_REPOSITORY: ${{ vars.REPO_NAME }}
-            IMAGE_TAG: ${{ env.commit-hash }}-${{ env.timestamp }}
+            IMAGE_TAG: latest
         run: |
             # Build the image with a unique tag
             docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
