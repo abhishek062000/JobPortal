@@ -13,6 +13,7 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+Run npm run build
 # Expose port 8000 for the Express server
 EXPOSE 80
 
