@@ -53,10 +53,3 @@ jobs:
             # Push both the unique tag and the latest tag
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
             docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
-
-      # Add a step to deploy the latest image if needed
-      - name: Deploy to ECS
-        run: |
-          # Here you can add your deployment commands to ECS
-          # For example, you can use AWS CLI to update the ECS service to use the latest image
-          aws ecs update-service --cluster your-cluster-name --service your-service-name --force-new-deployment
